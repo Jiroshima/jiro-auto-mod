@@ -101,21 +101,33 @@
                 if (message.toLowerCase().includes("retard")) {
                     messageDiv.classList.add('filtered');
                     // Timeout for 30 seconds if the word "retard" is detected
-                    client.timeout(channel, tags.username, 30, "Filtered word detected: 'retard'").catch(err => {
-                        console.error(`Error timing out user: ${err}`);
-                    });
+                    client.timeout(channel, tags.username, 30, "Filtered word detected: 'retard'")
+                        .then(() => {
+                            console.log(`${tags.username} timed out for 30 seconds.`);
+                        })
+                        .catch(err => {
+                            console.error(`Error timing out user: ${err.message}`);
+                        });
                 } else if (message.toLowerCase().includes("superman")) {
                     messageDiv.classList.add('filtered');
                     // Ban user if 'superman' is detected
-                    client.ban(channel, tags.username, "Banned for 'superman'").catch(err => {
-                        console.error(`Error banning user: ${err}`);
-                    });
+                    client.ban(channel, tags.username, "Banned for 'superman'")
+                        .then(() => {
+                            console.log(`${tags.username} banned for using 'superman'.`);
+                        })
+                        .catch(err => {
+                            console.error(`Error banning user: ${err.message}`);
+                        });
                 } else if (message.toLowerCase().includes("batmobile")) {
                     messageDiv.classList.add('filtered');
                     // Timeout for 10 seconds if 'batmobile' is detected
-                    client.timeout(channel, tags.username, 10, "Filtered word detected: 'batmobile'").catch(err => {
-                        console.error(`Error timing out user: ${err}`);
-                    });
+                    client.timeout(channel, tags.username, 10, "Filtered word detected: 'batmobile'")
+                        .then(() => {
+                            console.log(`${tags.username} timed out for 10 seconds.`);
+                        })
+                        .catch(err => {
+                            console.error(`Error timing out user: ${err.message}`);
+                        });
                 }
 
                 // Add the username and the message
