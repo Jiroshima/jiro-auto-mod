@@ -36,12 +36,7 @@
     <h1>Welcome to the Twitch Bot Chat</h1>
 
     <!-- Authorization link to get the access token -->
-    <!-- Modified the redirect URI to localhost -->
     <a href="https://id.twitch.tv/oauth2/authorize?client_id=h29p7xsyql5d0bi8svypmjt3yqhl8z&redirect_uri=https://jiro-auto-mod.netlify.app/twitch_automod_bot.html&response_type=token&scope=chat%3Aedit+chat%3Aread+moderation%3Aread">Connect with Twitch</a>
-
-
-
-
 
     <div id="chat-container"></div>
 
@@ -83,7 +78,7 @@
                 },
                 identity: {
                     username: 'Jiroshima_',  // Your bot's username
-                    password: `oauth:y7ybiufrdgh316lzum31er52t6gitz`  // Use retrieved OAuth token
+                    password: `oauth:${accessToken}`  // Use the retrieved OAuth token here
                 },
                 channels: ['Jiroshima_']  // Channel to join
             });
