@@ -53,19 +53,16 @@
                 if (accessToken) {
                     localStorage.setItem("twitch_token", accessToken);  // Store token for later use
                     alert("Twitch Access Token Retrieved Successfully!");
+                    // Once token is retrieved, initialize the bot
+                    initializeBot(accessToken);
                 } else {
                     alert("Failed to retrieve Twitch token.");
                 }
             }
         }
 
-        // Run function when page loads
-        window.onload = getTwitchToken;
-
-        // Retrieve stored token for bot authentication
-        const accessToken = localStorage.getItem("twitch_token");
-
-        if (accessToken) {
+        // Function to initialize the bot after token is retrieved
+        function initializeBot(token) {
             const client = new tmi.Client({
                 options: {
                     debug: true,
@@ -78,7 +75,7 @@
                 },
                 identity: {
                     username: 'Jiroshima_',  // Your bot's username
-                    password: `oauth:${accessToken}`  // Use the retrieved OAuth token here
+                    password: `oauth:${token}`  // Use the retrieved OAuth token here
                 },
                 channels: ['Jiroshima_']  // Channel to join
             });
@@ -130,8 +127,15 @@
                 // Auto-scroll to the latest message
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             });
-        } else {
-            console.warn("No Twitch token found. Please authorize the bot first.");
+        }
+
+        // Run function when page loads
+        window.onload = getTwitchToken;
+
+        // Check if there's an existing token and initialize the bot directly if available
+        const existingToken = localStorage.getItem("twitch_token");
+        if (existingToken) {
+            initializeBot(existingToken);
         }
     </script>
 </body>
