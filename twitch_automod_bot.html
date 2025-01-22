@@ -36,7 +36,7 @@
     <h1>Welcome to the Twitch Bot Chat</h1>
 
     <!-- Authorization link to get the access token -->
-    <a href="https://id.twitch.tv/oauth2/authorize?client_id=h29p7xsyql5d0bi8svypmjt3yqhl8z&redirect_uri=https://jiro-auto-mod.netlify.app/twitch_automod_bot.html&response_type=token&scope=chat%3Aedit+chat%3Aread+moderation%3Aread">Connect with Twitch</a>
+    <a href="https://id.twitch.tv/oauth2/authorize?client_id=h29p7xsyql5d0bi8svypmjt3yqhl8z&redirect_uri=https://jiro-auto-mod.netlify.app/twitch_automod_bot.html&response_type=token&scope=chat%3Aedit+chat%3Aread+moderation%3Aread+moderation%3Amanage">Connect with Twitch</a>
 
     <div id="chat-container"></div>
 
@@ -101,6 +101,7 @@
                 if (message.toLowerCase().includes("retard")) {
                     console.log("Detected word: 'retard'");
                     messageDiv.classList.add('filtered');
+                    // Use the tmi.js method to timeout the user
                     client.timeout(channel, tags.username, 30, "Filtered word detected: 'retard'")
                         .then(() => {
                             console.log(`${tags.username} timed out for 30 seconds.`);
@@ -111,6 +112,7 @@
                 } else if (message.toLowerCase().includes("superman")) {
                     console.log("Detected word: 'superman'");
                     messageDiv.classList.add('filtered');
+                    // Use the tmi.js method to ban the user
                     client.ban(channel, tags.username, "Banned for 'superman'")
                         .then(() => {
                             console.log(`${tags.username} banned for using 'superman'.`);
@@ -121,6 +123,7 @@
                 } else if (message.toLowerCase().includes("batmobile")) {
                     console.log("Detected word: 'batmobile'");
                     messageDiv.classList.add('filtered');
+                    // Use the tmi.js method to timeout the user
                     client.timeout(channel, tags.username, 10, "Filtered word detected: 'batmobile'")
                         .then(() => {
                             console.log(`${tags.username} timed out for 10 seconds.`);
