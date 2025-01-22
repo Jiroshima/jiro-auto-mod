@@ -99,38 +99,17 @@
 
                 // **Filtering specific words for moderation**
                 if (message.toLowerCase().includes("retard")) {
-                    console.log("Detected word: 'retard'");
                     messageDiv.classList.add('filtered');
-                    // Use the tmi.js method to timeout the user
-                    client.timeout(channel, tags.username, 30, "Filtered word detected: 'retard'")
-                        .then(() => {
-                            console.log(`${tags.username} timed out for 30 seconds.`);
-                        })
-                        .catch(err => {
-                            console.error(`Error timing out user: ${err.message}`);
-                        });
+                    // Timeout for 30 seconds if the word "retard" is detected
+                    timeoutUser(channel, tags.username, 30);
                 } else if (message.toLowerCase().includes("superman")) {
-                    console.log("Detected word: 'superman'");
                     messageDiv.classList.add('filtered');
-                    // Use the tmi.js method to ban the user
-                    client.ban(channel, tags.username, "Banned for 'superman'")
-                        .then(() => {
-                            console.log(`${tags.username} banned for using 'superman'.`);
-                        })
-                        .catch(err => {
-                            console.error(`Error banning user: ${err.message}`);
-                        });
+                    // Ban user if 'superman' is detected
+                    banUser(channel, tags.username, "Banned for 'superman'");
                 } else if (message.toLowerCase().includes("batmobile")) {
-                    console.log("Detected word: 'batmobile'");
                     messageDiv.classList.add('filtered');
-                    // Use the tmi.js method to timeout the user
-                    client.timeout(channel, tags.username, 10, "Filtered word detected: 'batmobile'")
-                        .then(() => {
-                            console.log(`${tags.username} timed out for 10 seconds.`);
-                        })
-                        .catch(err => {
-                            console.error(`Error timing out user: ${err.message}`);
-                        });
+                    // Timeout for 10 seconds if 'batmobile' is detected
+                    timeoutUser(channel, tags.username, 10);
                 }
 
                 // Add the username and the message
@@ -144,14 +123,58 @@
             });
         }
 
-        // Run function when page loads
-        window.onload = getTwitchToken;
-
-        // Check if there's an existing token and initialize the bot directly if available
-        const existingToken = localStorage.getItem("twitch_token");
-        if (existingToken) {
-            initializeBot(existingToken);
+        // Timeout user via Twitch Helix API
+        function timeoutUser(channel, username, duration) {
+            fetch(`https://api.twitch.tv/helix/moderation/automod/timeout`, {
+                method: 'POST',
+                headers: {
+                    'Client-ID': 'h29p7xsyql5d0bi8svypmjt3yqhl8z',
+                    'Authorization': `Bearer ${localStorage.getItem('twitch_token')}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    broadcaster_id: 'YOUR_BROADCASTER_ID',  // Replace with actual broadcaster ID
+                    user_id: 'USER_ID_OF_' + username,  // Replace with actual user ID, you might need to look it up first
+                    duration: duration * 60  // Duration in seconds
+                })
+            }).then(response => {
+                if (response.ok) {
+                    console.log(`User ${username} timed out for ${duration} seconds`);
+                } else {
+                    console.error("Failed to timeout user:", response);
+                }
+            }).catch(error => {
+                console.error("Error timing out user:", error);
+            });
         }
+
+        // Ban user via Twitch Helix API
+        function banUser(channel, username, reason) {
+            fetch(`https://api.twitch.tv/helix/moderation/bans`, {
+                method: 'POST',
+                headers: {
+                    'Client-ID': 'h29p7xsyql5d0bi8svypmjt3yqhl8z',
+                    'Authorization': `Bearer ${localStorage.getItem('twitch_token')}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    broadcaster_id: 'YOUR_BROADCASTER_ID',  // Replace with actual broadcaster ID
+                    user_id: 'USER_ID_OF_' + username,  // Replace with actual user ID
+                    reason: reason
+                })
+            }).then(response => {
+                if (response.ok) {
+                    console.log(`User ${username} banned for reason: ${reason}`);
+                } else {
+                    console.error("Failed to ban user:", response);
+                }
+            }).catch(error => {
+                console.error("Error banning user:", error);
+            });
+        }
+
+        // Run the function when the page loads to retrieve the token
+        window.onload = getTwitchToken;
     </script>
 </body>
 
