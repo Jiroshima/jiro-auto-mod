@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitch Chat Bot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #chat-container {
+            width: 80%;
+            height: 500px;
+            overflow-y: scroll;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .filtered {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Welcome to the Twitch Bot Chat</h1>
+
+    <!-- Authorization link to get the access token -->
+    <!-- Modified the redirect URI to localhost -->
+    <a href="https://id.twitch.tv/oauth2/authorize?client_id=h29p7xsyql5d0bi8svypmjt3yqhl8z&redirect_uri=http://localhost:8080/twitch_automod_bot.html&response_type=token&scope=chat%3Aedit+chat%3Aread+moderation%3Aread">Connect with Twitch</a>
+
+
+
+
+
+    <div id="chat-container"></div>
+
+    <script src="https://github.com/tmijs/tmi.js/releases/download/v1.8.5/tmi.min.js"></script>
+
+    <script>
+        // Function to extract the access token from URL fragment
+        function getTwitchToken() {
+            const hash = window.location.hash;
+            if (hash.includes("access_token")) {
+                const params = new URLSearchParams(hash.substring(1));
+                const accessToken = params.get("access_token");
+
+                if (accessToken) {
+                    localStorage.setItem("twitch_token", accessToken);  // Store token for later use
+                    alert("Twitch Access Token Retrieved Successfully!");
+                } else {
+                    alert("Failed to retrieve Twitch token.");
+                }
+            }
+        }
+
+        // Run function when page loads
+        window.onload = getTwitchToken;
+
+        // Retrieve stored token for bot authentication
+        const accessToken = localStorage.getItem("twitch_token");
+
+        if (accessToken) {
+            const client = new tmi.Client({
+                options: {
+                    debug: true,
+                    skipMembership: true,
+                    skipUpdatingEmotesets: true,
+                },
+                connection: {
+                    reconnect: true,
+                    secure: true
+                },
+                identity: {
+                    username: 'Jiroshima_',  // Your bot's username
+                    password: `oauth:y7ybiufrdgh316lzum31er52t6gitz`  // Use retrieved OAuth token
+                },
+                channels: ['Jiroshima_']  // Channel to join
+            });
+
+            // Connect to Twitch chat
+            client.connect().then(() => {
+                console.log("Connected to Twitch chat!");
+            }).catch((error) => {
+                console.error("Connection failed:", error);
+            });
+
+            const chatContainer = document.getElementById('chat-container');
+
+            client.on('message', (channel, tags, message, self) => {
+                console.log(`Message received from ${tags.username}: ${message}`);
+
+                if (self) return;  // Ignore messages from the bot itself
+
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('chat-message');
+
+                // **Filtering specific words for moderation**
+                if (message.toLowerCase().includes("retard")) {
+                    messageDiv.classList.add('filtered');
+                    // Timeout for 30 seconds if the word "retard" is detected
+                    client.timeout(channel, tags.username, 30, "Filtered word detected: 'retard'").catch(err => {
+                        console.error(`Error timing out user: ${err}`);
+                    });
+                } else if (message.toLowerCase().includes("superman")) {
+                    messageDiv.classList.add('filtered');
+                    // Ban user if 'superman' is detected
+                    client.ban(channel, tags.username, "Banned for 'superman'").catch(err => {
+                        console.error(`Error banning user: ${err}`);
+                    });
+                } else if (message.toLowerCase().includes("batmobile")) {
+                    messageDiv.classList.add('filtered');
+                    // Timeout for 10 seconds if 'batmobile' is detected
+                    client.timeout(channel, tags.username, 10, "Filtered word detected: 'batmobile'").catch(err => {
+                        console.error(`Error timing out user: ${err}`);
+                    });
+                }
+
+                // Add the username and the message
+                messageDiv.innerHTML = `<strong>${tags.username}:</strong> ${message}`;
+
+                // Append the message div to the chat container
+                chatContainer.appendChild(messageDiv);
+
+                // Auto-scroll to the latest message
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
+        } else {
+            console.warn("No Twitch token found. Please authorize the bot first.");
+        }
+    </script>
+</body>
+
+</html>
