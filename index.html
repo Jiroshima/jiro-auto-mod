@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitch Chat Example</title>
+</head>
+<body>
+    <h1>Twitch Chat Example</h1>
+
+    <input type="text" id="channelUsername" placeholder="Enter channel username">
+    <button id="connectChat">Connect to Chat</button>
+
+    <div id="chatBox">
+        <h2>Chat:</h2>
+        <div id="chatMessages" style="height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;"></div>
+    </div>
+
+    <!-- Link to the socket.io client for real-time messages -->
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+
+    <script>
+        const socket = io(); // Connect to the backend's socket.io server
+
+        document.getElementById('connectChat').onclick = async function() {
+            const channelUsername = document.getElementById('channelUsername').value;
+            if (!channelUsername) {
+                alert('Please enter a channel username');
+                return;
+            }
+
+            // Send a request to the backend to connect to the chat
+            const response = await fetch('http://localhost:5500/connect-chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    channelUsername: channelUsername
+                })
+            });
+
+            const data = await response.json();
+            alert(data.message);
+        };
+
+        // Listen for chat messages from the backend via Socket.io
+        socket.on('chat-message', (data) => {
+            const chatMessages = document.getElementById('chatMessages');
+            const newMessage = document.createElement('p');
+            newMessage.textContent = `${data.user}: ${data.message}`;
+            chatMessages.appendChild(newMessage);
+
+            // Scroll to the bottom of the chat
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+    </script>
+</body>
+</html>
